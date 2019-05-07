@@ -28,13 +28,6 @@ documents = coll.find()
 for doc in documents:
     print(doc)
 
-
-
-
-@app.route('/')
-def hello():
-    return render_template('index.html')
-
 if __name__ == '__main__':
     app.run(host=os.environ.get('IP'),
             port=int(os.environ.get('PORT')),
