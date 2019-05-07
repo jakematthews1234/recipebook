@@ -18,9 +18,8 @@ def mongo_connect(url):
         return conn
     except pymongo.errors.ConnectionFailure as e:
         print("Could not connect to MongoDB: %s") % e
-        
+#conn/coll definitions        
 conn = mongo_connect(MONGODB_URI)
-
 coll = conn[DBS_NAME][COLLECTION_NAME]
 
 documents = coll.find()
