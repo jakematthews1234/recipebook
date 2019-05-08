@@ -18,7 +18,30 @@ def mongo_connect(url):
         return conn
     except pymongo.errors.ConnectionFailure as e:
         print("Could not connect to MongoDB: %s") % e
-#menu screen        
+        
+#find recipe function
+def get_recipe():
+    print("")
+    recipe_name = input("Enter recipe name >")
+    author = input("Enter an authors name > ")
+    Ingredients = input("Enter an Ingredient here > ")
+    doc = None
+    #search function options
+    try:
+        doc = coll.find_one({'recipe_name': recipe_name.lower(), 'author': author.lower(),
+            'Ingredients': Ingredients()
+        })
+        return doc 
+    #failed search result    
+    except:
+        print("Error accessing the database")
+    
+    #no document found result    
+    if not doc:
+         print("")
+         print("Error! No results found.")
+        
+#menu screen     
 def show_menu():
     print("")
     print("1. Add a recipe")
@@ -30,28 +53,6 @@ def show_menu():
     option = input("Enter option")
     return option
     
-#find recipe function
-def find_recipe():
-    print("")
-    recipe_name = input("Enter recipe name >")
-    author = input("Enter an authors name > ")
-    Ingredients = input("Enter an Ingredient here > ")
-    
-    #search function options
-    try:
-        doc = coll.find_one({'recipe_name': recipe_name.lower(), 'author': author.lower(),
-            'Ingredients': Ingredients()
-        })
-    #failed search result    
-    except:
-        print("Error accessing the database")
-    
-    #no document found result    
-    if not doc:
-        print("")
-        print("Error! No results found.")
-        
-    return doc    
 # add recipe function    
 def add_recipe():
     print("")
@@ -75,7 +76,59 @@ def add_recipe():
     except:
         print("Error accessing the database")
         
+def find_recipe():
+    doc = get_recipe()
+    if doc:
+        print("")
+        for k,v in doc.items():
+            if k != "_id":
+                print(k.capitalise() + ":" + v.capitalise)
+                
+def edit_recipe():
+    doc = get_recipe()
+    if doc:
+        update_doc={}
+        print("")
+        for k, v in doc.items():
+            if k != "_id":
+                update_doc[k] = input(k.capitalise() + " [" + v + "] > ")
+                if update_doc[k] == "":
+                    update_doc[k] = v
+                    
+        try:
+            coll.update_one(doc, {'$set': update_doc})
+            print("")
+            print("Document updated")
+        except: 
+            print("Error accessing the database")
+            
+def delete_recipe():
     
+    doc = get_recipe()
+    
+    if doc:
+        print("")
+        for k,v in doc.items():
+            if k != "_id":
+                print(k.capitalise() + ":" + v.capitalise())
+                
+        print("")
+        confirmation = input("Are you sure you wish to delete this recipe?\nY or N > ")
+        print("")
+        
+        if confirmation.lower() == 'y':
+            try:
+                coll.remove(doc)
+                print("Recipe deleted!")
+            except:
+                print("Error accessing database")
+                
+            else:
+                print("Document not deleted")
+            
+        
+        
+        
 #once option is selected, print the selected option to screen    
 def main_loop():
     while True:
@@ -85,7 +138,7 @@ def main_loop():
         elif option == "2":
             find_recipe()
         elif option == "3":
-            update_recipe()
+            edit_recipe()
         elif option == "4":
             delete_recipe()
         elif option == "5":
@@ -94,6 +147,8 @@ def main_loop():
         else:
             print("Invalid option")
         print("")    
+        
+        
         
 #conn/coll definitions        
 conn = mongo_connect(MONGODB_URI)
@@ -104,4 +159,5 @@ main_loop()
         
         
         
-        
+                
+    
